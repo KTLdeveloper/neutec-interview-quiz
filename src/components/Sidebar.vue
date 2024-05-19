@@ -8,12 +8,7 @@
         name: 'PageSidebar',
     })
 
-    const showMenu = defineModel({ default: false })
-    const target = ref(null)
-    onClickOutside(target, () => {
-        showMenu.value = !showMenu.value
-    })
-
+    // this is about sidebar's content
     const activityNodes = reactive(new Map())
     provide('activityNodes', activityNodes)
     const handleUpdateActivityNodes = ({ depth, symbol }) => {
@@ -31,6 +26,17 @@
             }
         }
     }
+
+    // this is about show and hide menu
+    const showMenu = defineModel({ default: false })
+    const target = ref(null)
+    onClickOutside(target, () => {
+        showMenu.value = !showMenu.value
+        // if user manual click outside, we need to clear all activityNodes
+        if (showMenu.value) {
+            activityNodes.clear()
+        }
+    })
 </script>
 
 <template>
