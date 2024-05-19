@@ -2,30 +2,37 @@
     import TreeView from '@/components/TreeView.vue'
     import data from '@/mock/data.json'
     import { onClickOutside } from '@vueuse/core'
-    import { defineComponent, defineModel, provide, reactive, ref } from 'vue'
+    import { defineComponent, defineModel, onMounted, provide, ref } from 'vue'
 
     defineComponent({
         name: 'PageSidebar',
     })
 
     // this is about sidebar's content
-    const activityNodes = reactive(new Map())
-    provide('activityNodes', activityNodes)
+    const activityNodes = ref(new Map())
+    provide('getActivityNodes', () => activityNodes.value)
     const handleUpdateActivityNodes = ({ depth, symbol }) => {
-        const nodeValue = activityNodes.get(depth)
+        const nodeValue = activityNodes.value.get(depth)
         if (nodeValue === undefined) {
-            activityNodes.set(depth, symbol)
-            return
+            activityNodes.value.set(depth, symbol)
         } else {
-            const originSize = activityNodes.size
+            const originSize = activityNodes.value.size
             for (let i = depth; i < originSize; i++) {
-                activityNodes.delete(i)
+                activityNodes.value.delete(i)
             }
             if (nodeValue !== symbol) {
-                activityNodes.set(depth, symbol)
+                activityNodes.value.set(depth, symbol)
             }
         }
+        window.localStorage.setItem('nodeHistory', JSON.stringify(Object.fromEntries(activityNodes.value)))
     }
+
+    onMounted(() => {
+        const history = window.localStorage.getItem('nodeHistory')
+        if (history !== null) {
+            activityNodes.value = new Map(Object.entries(JSON.parse(history)))
+        }
+    })
 
     // this is about show and hide menu
     const showMenu = defineModel({ default: false })
@@ -34,7 +41,8 @@
         showMenu.value = !showMenu.value
         // if user manual click outside, we need to clear all activityNodes
         if (showMenu.value) {
-            activityNodes.clear()
+            activityNodes.value.clear()
+            window.localStorage.clear()
         }
     })
 </script>

@@ -26,13 +26,16 @@
 
     const emit = defineEmits(['update-activity-nodes'])
 
-    const activityNodes = inject('activityNodes')
+    const getActivityNodes = inject('getActivityNodes')
     const handleUpdateActivityNodes = ({ depth, symbol }) => {
         emit('update-activity-nodes', { depth, symbol })
     }
-    const isActive = computed(() => activityNodes.get(props.depth) === props.symbol)
+    const isActive = computed(() => {
+        const activityNodes = getActivityNodes()
+        return activityNodes.get(`${props.depth}`) === props.symbol
+    })
     const toggleText = () => {
-        handleUpdateActivityNodes({ depth: props.depth, symbol: props.symbol })
+        handleUpdateActivityNodes({ depth: `${props.depth}`, symbol: props.symbol })
     }
 </script>
 
